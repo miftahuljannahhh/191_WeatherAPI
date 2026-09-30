@@ -1,40 +1,293 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geolocation</title>
+    <title>Jejak Lokasi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #eaf2f8;
+            --blue: #5b8db8;
+            --blue-dark: #43759d;
+            --mist: #e4eff8;
+            --ink: #23384a;
+            --muted: #7a8fa1;
+            --line: #dbe7f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: "Nunito", system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 10% 6%, #cfe2f2 0, transparent 40%),
+                radial-gradient(circle at 90% 90%, #d9e8f3 0, transparent 42%),
+                var(--bg);
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 48px 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 520px;
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 24px;
+            padding: 26px 28px 28px;
+            box-shadow: 0 14px 40px rgba(67, 117, 157, 0.12);
+        }
+
+        .identity {
+            display: flex;
+            flex-direction: column;
+            width: fit-content;
+            max-width: 100%;
+            padding-left: 12px;
+            border-left: 4px solid var(--blue);
+            line-height: 1.45;
+        }
+        .identity b { font-weight: 700; font-size: 0.95rem; overflow-wrap: anywhere; }
+        .identity span { font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+        .title {
+            text-align: center;
+            margin: 22px 0 24px;
+        }
+        .title h1 {
+            font-size: clamp(1.8rem, 7vw, 2.3rem);
+            font-weight: 800;
+            line-height: 1.1;
+            text-wrap: balance;
+        }
+        .title p {
+            margin: 8px auto 0;
+            max-width: 380px;
+            font-size: 0.92rem;
+            line-height: 1.55;
+            color: var(--muted);
+            text-wrap: balance;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--blue-dark);
+            margin-bottom: 8px;
+        }
+
+        form { display: flex; gap: 8px; align-items: flex-end; }
+        .field { flex: 1; min-width: 0; }
+
+        input {
+            width: 100%;
+            font: inherit;
+            color: var(--ink);
+            padding: 11px 14px;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--blue); }
+        input::placeholder { color: #a9bac8; }
+
+        button {
+            height: 46px;
+            border: none;
+            border-radius: 12px;
+            background: var(--blue);
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            padding: 0 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background: var(--blue-dark); }
+        button:focus-visible { outline: 3px solid rgba(91, 141, 184, 0.4); outline-offset: 2px; }
+        button:disabled { opacity: 0.6; cursor: wait; }
+
+        #status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        #status:empty { display: none; }
+        #status.error { color: #b3453f; }
+
+        #hasil { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+
+        .lokasi small { color: var(--muted); font-size: 0.85rem; }
+        .lokasi p { font-size: 1.1rem; font-weight: 700; margin-top: 2px; line-height: 1.35; }
+
+        .coords {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .coords div {
+            background: var(--mist);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+        .coords span { display: block; font-size: 0.8rem; font-weight: 600; color: var(--blue); }
+        .coords b {
+            display: block;
+            margin-top: 2px;
+            font-size: 1.15rem;
+            color: var(--blue-dark);
+            font-variant-numeric: tabular-nums;
+        }
+
+        dl { margin-top: 10px; }
+        dl div {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 2px;
+            border-bottom: 1px solid var(--line);
+        }
+        dl div:last-child { border-bottom: none; padding-bottom: 0; }
+        dt { color: var(--muted); }
+        dd { font-weight: 700; text-align: right; }
+
+        @media (max-width: 480px) {
+            body { padding: 20px 14px 36px; }
+            .card { padding: 22px 20px 24px; }
+            .coords { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-    <h3>Nama :</h3>
-    <h3>NIM :</h3>
+    <div class="card">
+        <div class="identity">
+            <b>Miftahul Jannah</b>
+            <span>20240140191</span>
+        </div>
 
-    <p> 
-        Kota : 
-        <span id="lokasi"></span><br>
-    </p>
+        <header class="title">
+            <h1>Jejak Lokasi</h1>
+            <p>Temukan negara, provinsi, kecamatan, dan koordinat dari nama tempat.</p>
+        </header>
 
-    <hr>
+        <form id="form">
+            <div class="field">
+                <label for="lokasiInput">Lokasi</label>
+                <input id="lokasiInput" type="text" value="Jakarta" placeholder="Contoh: Kasihan, Bantul" autocomplete="off" required>
+            </div>
+            <button id="btn" type="submit">Cari</button>
+        </form>
 
-    <p>
-        Koordinat :
-        <span id="negara"></span>
-    </p>
-    
+        <p id="status" role="status"></p>
+
+        <div id="hasil" hidden>
+            <div class="lokasi">
+                <small>Lokasi ditemukan</small>
+                <p id="lokasi">-</p>
+            </div>
+
+            <div class="coords">
+                <div><span>Longitude</span><b id="longitude">-</b></div>
+                <div><span>Latitude</span><b id="latitude">-</b></div>
+            </div>
+
+            <dl>
+                <div><dt>Negara</dt><dd id="negara">-</dd></div>
+                <div><dt>Provinsi</dt><dd id="provinsi">-</dd></div>
+                <div><dt>Kecamatan</dt><dd id="kecamatan">-</dd></div>
+            </dl>
+        </div>
+    </div>
+
     <script>
-        fetch("/api/lokasi")
-            .then(response => response.json())
-            .then(data => {
+        const API_KEY = "TmW3n2IbOKaZxkghOoYB";
 
-               console.log(data);
+        const $ = (id) => document.getElementById(id);
 
-                document.getElementById("lokasi").innerHTML = data.kota;
-                document.getElementById("negara").innerHTML = data.koordinat;
-            })
-            .catch(error => {
+        function setStatus(msg, isError) {
+            $("status").textContent = msg;
+            $("status").classList.toggle("error", !!isError);
+        }
+
+        function ambilWilayah(feature, tipe) {
+            const items = [feature].concat(feature.context || []);
+            for (const t of tipe) {
+                const found = items.find((it) => String(it.id || "").split(".")[0] === t);
+                if (found && found.text) return found.text;
+            }
+            return "Tidak tersedia";
+        }
+
+        async function cariLokasi(query) {
+            const url = "https://api.maptiler.com/geocoding/" + encodeURIComponent(query) +
+                        ".json?key=" + API_KEY + "&language=id&limit=1";
+            const response = await fetch(url);
+
+            if (response.status === 401 || response.status === 403) {
+                throw new Error("API key ditolak MapTiler. Periksa nilai API_KEY di index.html.");
+            }
+            if (!response.ok) {
+                throw new Error("Gagal mengambil data (kode " + response.status + ").");
+            }
+
+            const data = await response.json();
+            console.log(data);
+
+            if (!data.features || data.features.length === 0) {
+                throw new Error("Lokasi tidak ditemukan. Coba nama yang lebih spesifik.");
+            }
+            return data.features[0];
+        }
+
+        function tampilkan(feature) {
+            const koordinat = feature.center || (feature.geometry && feature.geometry.coordinates);
+            const lng = Number(koordinat[0]);
+            const lat = Number(koordinat[1]);
+
+            $("lokasi").textContent = feature.place_name || feature.text || "-";
+            $("longitude").textContent = lng.toFixed(5);
+            $("latitude").textContent = lat.toFixed(5);
+            $("negara").textContent = ambilWilayah(feature, ["country"]);
+            $("provinsi").textContent = ambilWilayah(feature, ["region"]);
+            $("kecamatan").textContent = ambilWilayah(feature, ["municipal_district", "joint_municipality"]);
+            $("hasil").hidden = false;
+        }
+
+        async function proses() {
+            const query = $("lokasiInput").value.trim();
+            if (!query) return;
+
+            $("btn").disabled = true;
+            $("hasil").hidden = true;
+            setStatus("Mencari lokasi...");
+
+            try {
+                tampilkan(await cariLokasi(query));
+                setStatus("");
+            } catch (error) {
                 console.error(error);
-            });
-    </script>
+                setStatus(error.message || "Terjadi kesalahan jaringan.", true);
+            } finally {
+                $("btn").disabled = false;
+            }
+        }
 
+        $("form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            proses();
+        });
+
+        proses();
+    </script>
 </body>
 </html>
